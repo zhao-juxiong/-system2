@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>餐厅订单管理系统</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .background-slideshow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            perspective: 1000px;
+        }
+
+        .background-slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: transform 1s ease, opacity 1s ease;
+            background-size: 200% 200%;
+            background-position: center;
+            transform-style: preserve-3d;
+            animation: gradientMove 15s ease infinite;
+        }
+
+        .background-slide.active {
+            opacity: 1;
+        }
+
+        .background-slide:nth-child(1) {
+            background-image: url('/static/images/restaurant1.jpg');
+        }
+
+        .background-slide:nth-child(2) {
+            background-image: url('/static/images/restaurant2.jpg');
+        }
+
+        .background-slide:nth-child(3) {
+            background-image: url('/static/images/restaurant3.jpg');
+        }
+
+        .background-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 美化表单容器 */
+        .form-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            color: white;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+            outline: none;
+        }
+
+        /* 美化提交按钮 */
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: rgba(76, 175, 80, 0.8);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: rgba(76, 175, 80, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 美化表格 */
+        table {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background: rgba(76, 175, 80, 0.8);
+            color: white;
+            padding: 15px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        td {
+            padding: 12px 15px;
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* 美化删除按钮 */
+        .delete-btn {
+            background: rgba(220, 53, 69, 0.8);
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: rgba(220, 53, 69, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 美化注销按钮 */
+        .logout-btn {
+            background: rgba(220, 53, 69, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(220, 53, 69, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="background-slideshow">
+        <div class="background-slide active"></div>
+        <div class="background-slide"></div>
+        <div class="background-slide"></div>
+    </div>
+    <div class="background-overlay"></div>
+
+    <div class="container">
+        <div style="text-align: right; margin-bottom: 20px;">
+            <button onclick="logout()" style="background-color: #dc3545;">注销</button>
+        </div>
+
+        <h1>餐厅订单管理系统</h1>
+        
+        <!-- 创建订单表单 -->
+        <div class="form-container">
+            <h2>创建新订单</h2>
+            <div class="form-group">
+                <label for="item">菜品名称：</label>
+                <input type="text" id="item" required>
+            </div>
+            <div class="form-group">
+                <label for="quantity">数量：</label>
+                <input type="number" id="quantity" min="1" required>
+            </div>
+            <div class="form-group">
+                <label for="price">单价：</label>
+                <input type="number" id="price" min="0" step="0.1" required>
+            </div>
+            <button onclick="createOrder()" class="submit-btn">提交订单</button>
+        </div>
+
+        <!-- 订单列表 -->
+        <h2>订单列表</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>订单ID</th>
+                    <th>菜品</th>
+                    <th>数量</th>
+                    <th>单价</th>
+                    <th>总价</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="ordersList">
+                <!-- 订单数据将在这里动态显示 -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function initBackgroundSlideshow() {
+            const slides = document.querySelectorAll('.background-slide');
+            let currentSlide = 0;
+
+            function rotateSlides() {
+                slides[currentSlide].classList.remove('active');
+                slides[currentSlide].style.transform = 'rotateY(-180deg)';
+                
+                currentSlide = (currentSlide + 1) % slides.length;
+                
+                slides[currentSlide].classList.add('active');
+                slides[currentSlide].style.transform = 'rotateY(0)';
+                
+                for(let i = 0; i < slides.length; i++) {
+                    if(i !== currentSlide) {
+                        slides[i].style.transform = 'rotateY(180deg)';
+                    }
+                }
+            }
+
+            setInterval(rotateSlides, 5000);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadOrders();
+            initBackgroundSlideshow();
+        });
+
+        function logout() {
+            window.location.href = '/logout';
+        }
+
+        function createOrder() {
+            const item = document.getElementById('item').value.trim();
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const price = parseFloat(document.getElementById('price').value);
+
+            if (!item) {
+                alert('请输入菜品名称');
+                return;
+            }
+            if (!quantity || quantity <= 0) {
+                alert('请输入有效的数量');
+                return;
+            }
+            if (!price || price <= 0) {
+                alert('请输入有效的价格');
+                return;
+            }
+
+            fetch('/order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ item, quantity, price })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('订单创建成功！');
+                document.getElementById('item').value = '';
+                document.getElementById('quantity').value = '';
+                document.getElementById('price').value = '';
+                loadOrders();
+            })
+            .catch(error => alert('创建订单失败：' + error));
+        }
+
+        function loadOrders() {
+            fetch('/orders')
+                .then(response => response.json())
+                .then(data => {
+                    const ordersList = document.getElementById('ordersList');
+                    ordersList.innerHTML = '';
+                    
+                    data.orders.forEach(order => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${order.id}</td>
+                            <td>${order.item}</td>
+                            <td>${order.quantity}</td>
+                            <td>￥${order.price.toFixed(2)}</td>
+                            <td>￥${order.total_price.toFixed(2)}</td>
+                            <td>
+                                <button onclick="deleteOrder(${order.id})" class="delete-btn">
+                                    删除
+                                </button>
+                            </td>
+                        `;
+                        ordersList.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('加载订单失败：', error));
+        }
+
+        // 添加删除订单函数
+        function deleteOrder(orderId) {
+            if (confirm('确定要删除这个订单吗？')) {
+                fetch(`/order/${orderId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert('订单已删除');
+                    loadOrders();  // 刷新订单列表
+                })
+                .catch(error => alert('删除订单失败：' + error));
+            }
+        }
+
+        // 修改提交按钮的类名
+        document.querySelector('.form-container button').classList.add('submit-btn');
+    </script>
+</body>
+</html> 
